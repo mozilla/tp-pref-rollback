@@ -12,7 +12,12 @@ function startup(data) {
     AddonManager.getAddonByID("tp-pref-rollback@mozilla.com", addon => addon.uninstall());
     return;
   }
-  DefaultPreferences.setBoolPref("privacy.trackingprotection.ui.enabled", false);
+
+  // Wait for partner builds to finish their customizations before changing the pref.
+  Services.obs.addObserver(function observer(aSubject, aTopic, aData) {
+    Services.obs.removeObserver(observer, "distribution-customization-complete");
+    DefaultPreferences.setBoolPref("privacy.trackingprotection.ui.enabled", false);
+  }, "distribution-customization-complete");
 }
 
 function shutdown(data) {
